@@ -5,10 +5,11 @@ import (
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"log"
 	"os"
 	"strings"
 	"text/template"
+
+	"github.com/S-ign/stringutils"
 )
 
 // TemplateData names and organizes templates. Saving the template string to
@@ -46,6 +47,23 @@ func (t *TemplateData) ApplyPlaceholders() string {
 	return output.String()
 }
 
+// UpdateTemplate updates the template text in its saved file location
+// template/<catagory>/<name>
+func (t *TemplateData) UpdateTemplate(template string) error {
+	t.Template = template
+	err := os.WriteFile(fmt.Sprintf("templates/%s/%s", t.Catagory, t.Name), []byte(template), 0644)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+// DeleteTemplate removes template text from saved location
+// template/<catagory>/<name>
+func (t *TemplateData) DeleteTemplate() {
+	os.Remove(fmt.Sprintf("templates/%v/%v", t.Catagory, t.Name))
+}
+
 // ListTemplateCategories list directories in templates folder, which is used
 // for the catagory names of the templates
 func ListTemplateCategories() map[string][]string {
@@ -80,35 +98,6 @@ func ListTemplatesInCatagory(catagory string) (templates []*TemplateData, err er
 	return templates, nil
 }
 
-// TODO: move GetAllSubstrInBetweenTwoStrs to stringutils package and call it
-// from there.
-
-// GetAllSubstrInBetweenTwoStrs returns a slice of substrings that are
-// surrounded by given start and end strings.
-// Ex.
-// str := "Get {{.placeholders}} within a {{.template}} string."
-// substrs := GetAllSubstrInBetweenTwoStrs(str, "{{.", "}}")
-// substrs = []string{"placeholders", "template"}
-func GetAllSubstrInBetweenTwoStrs(str string, startS string, endS string) map[string]string {
-	strS := strings.Split(str, " ")
-	substrs := make(map[string]string)
-	for _, ss := range strS {
-		var result string
-		s := strings.Index(ss, startS)
-		if s == -1 {
-			continue
-		}
-		newS := ss[s+len(startS):]
-		e := strings.Index(newS, endS)
-		if e == -1 {
-			continue
-		}
-		result = newS[:e]
-		substrs[result] = ""
-	}
-	return substrs
-}
-
 // AddTemplateData Creates a new TemplateData struct, writing the template
 // string to file, organizing it by template/<catagory>/<name>
 // Template strings must have placeholders surrounded like {{.placeholder}}
@@ -121,22 +110,24 @@ func AddTemplateData(catagory, name, template string) (*TemplateData, error) {
 		ex. Template with {{.placeholder}}`)
 	}
 
-	path := "templates/" + catagory
+	path := fmt.Sprintf("templates/%v", catagory)
 	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
 		err := os.Mkdir(path, os.ModePerm)
 		if err != nil {
-			log.Println(err)
+			return nil, err
 		}
 	}
 
-	// TODO: check if file already exists and force user to either delete or
-	// update the current file if desired.
-
-	err := os.WriteFile(fmt.Sprintf("templates/%s/%s", catagory, name), []byte(template), 0644)
-	if err != nil {
-		return nil, err
+	path = fmt.Sprintf("templates/%v/%v", catagory, name)
+	if _, err := os.Stat(path); errors.Is(err, os.ErrNotExist) {
+		err := os.WriteFile(fmt.Sprintf("templates/%s/%s", catagory, name), []byte(template), 0644)
+		if err != nil {
+			return nil, err
+		}
+	} else {
+		return nil, fmt.Errorf("error: template already exists, try updating or deleting this template instead")
 	}
-	placeholders := GetAllSubstrInBetweenTwoStrs(template, "{{.", "}}")
+	placeholders := stringutils.GetAllSubstrInBetweenTwoStrs(template, "{{.", "}}")
 
 	return &TemplateData{
 		Name:         name,
@@ -145,9 +136,6 @@ func AddTemplateData(catagory, name, template string) (*TemplateData, error) {
 		PlaceHolders: placeholders,
 	}, nil
 }
-
-// TODO: add update template function
-// TODO: add delete template function
 
 // GetTemplateData Retrives a premade template that was saved to file and
 // returns a TemplateData so that its methods can be used.
@@ -163,6 +151,6 @@ func GetTemplateData(catagory, name string) (*TemplateData, error) {
 		Name:         name,
 		Catagory:     catagory,
 		Template:     f,
-		PlaceHolders: GetAllSubstrInBetweenTwoStrs(f, "{{.", "}}"),
+		PlaceHolders: stringutils.GetAllSubstrInBetweenTwoStrs(f, "{{.", "}}"),
 	}, nil
 }

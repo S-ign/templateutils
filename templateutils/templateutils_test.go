@@ -4,7 +4,7 @@ import (
 	"reflect"
 	"testing"
 
-	templateutils "github.com/S-ign/templateutils/utils"
+	"github.com/S-ign/stringutils"
 )
 
 func TestAllSubstrInBetweenTwoStrs(t *testing.T) {
@@ -15,12 +15,12 @@ func TestAllSubstrInBetweenTwoStrs(t *testing.T) {
 	}{
 		{
 			name: "two words",
-			got:  templateutils.GetAllSubstrInBetweenTwoStrs("{{.hello}} whats up {{.blah}}", "{{.", "}}"),
+			got:  stringutils.GetAllSubstrInBetweenTwoStrs("{{.hello}} whats up {{.blah}}", "{{.", "}}"),
 			want: map[string]string{"hello": "", "blah": ""},
 		},
 		{
 			name: "many many words",
-			got: templateutils.GetAllSubstrInBetweenTwoStrs(
+			got: stringutils.GetAllSubstrInBetweenTwoStrs(
 				"welcome to, {{.company}}, {{.employee}}. Todays task is to: {{.task1}} {{.task2}} {{.task3}} {{.task4}}",
 				"{{.", "}}"),
 			want: map[string]string{"company": "", "employee": "", "task1": "", "task2": "", "task3": "", "task4": ""},
