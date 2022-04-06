@@ -104,12 +104,12 @@ func ListAllTemplates() (map[string][]*TemplateData, error) {
 	catagories := ListTemplateCategories()
 	allTemplates := make(map[string][]*TemplateData)
 
-	for k := range catagories {
-		templates, err := ListTemplatesInCatagory(k)
+	for _, c := range catagories["Catagories"] {
+		templates, err := ListTemplatesInCatagory(c)
 		if err != nil {
 			return nil, err
 		}
-		allTemplates[k] = templates
+		allTemplates[c] = templates
 	}
 	return allTemplates, nil
 }

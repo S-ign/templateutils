@@ -1,0 +1,12 @@
+Hi {{.name}},
+Thank you for reaching out to learn more about {{.company}}! The best way to learn more about our products/services as they pertain to {{.prospect}} is to set up a free {{.demo}} with {{.presenter}}. {{.demo_description}}.
+
+There will be no obligation to sign up after the call, and {{.other_perks}}.
+
+If you’d like to set up one of these {{.adjective}}( and free!) consults, {{.call_to_action}}.
+
+We look forward to hearing from you!
+
+{{.closing_statement}},
+
+{{.signature}}

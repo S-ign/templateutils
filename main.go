@@ -44,5 +44,5 @@ func main() {
 	fmt.Println("--------------------------------------------------")
 	fmt.Println("--------------------------------------------------")
 	fmt.Println("--------------------------------------------------")
-	templateutils.ListAllTemplates()
+	fmt.Println(templateutils.ListAllTemplates())
 }
