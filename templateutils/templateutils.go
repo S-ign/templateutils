@@ -55,6 +55,7 @@ func (t *TemplateData) UpdateTemplate(template string) error {
 	if err != nil {
 		return err
 	}
+	t.PlaceHolders = stringutils.GetAllSubstrInBetweenTwoStrs(template, "{{.", "}}")
 	return nil
 }
 
@@ -96,6 +97,21 @@ func ListTemplatesInCatagory(catagory string) (templates []*TemplateData, err er
 		templates = append(templates, template)
 	}
 	return templates, nil
+}
+
+// ListAllTemplates .
+func ListAllTemplates() (map[string][]*TemplateData, error) {
+	catagories := ListTemplateCategories()
+	allTemplates := make(map[string][]*TemplateData)
+
+	for k := range catagories {
+		templates, err := ListTemplatesInCatagory(k)
+		if err != nil {
+			return nil, err
+		}
+		allTemplates[k] = templates
+	}
+	return allTemplates, nil
 }
 
 // AddTemplateData Creates a new TemplateData struct, writing the template
